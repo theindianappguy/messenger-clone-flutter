@@ -46,19 +46,31 @@ class _HomeState extends State<Home> {
 
   Widget chatRoomsList() {
     return StreamBuilder(
-      stream: chatRoomsStream,
-      builder: (context, snapshot) {
-        return snapshot.hasData
-            ? ListView.builder(
-                itemCount: snapshot.data.docs.length,
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  DocumentSnapshot ds = snapshot.data.docs[index];
-                  return ChatRoomListTile(ds["lastMessage"], ds.id, myUserName);
-                })
-            : Center(child: CircularProgressIndicator());
-      },
-    );
+        stream: chatRoomsStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(
+              child: Text("Snapshot Error receiving chatrooms"),
+            );
+          } else if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.connectionState == ConnectionState.active) {
+            if (snapshot.data.docs.length == 0) {
+              return Center(child: Text("No user found"));
+            }
+            return ListView.builder(
+              itemCount: snapshot.data.docs.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                QueryDocumentSnapshot ds = snapshot.data.docs[index];
+                return ChatRoomListTile(
+                    ds.data()["lastMessage"], ds.id, myUserName);
+              },
+            );
+          } else {
+            return Text("");
+          }
+        });
   }
 
   Widget searchListUserTile({String profileUrl, name, username, email}) {
@@ -98,27 +110,33 @@ class _HomeState extends State<Home> {
 
   Widget searchUsersList() {
     return StreamBuilder(
-      stream: usersStream,
-      builder: (context, snapshot) {
-        return snapshot.hasData
-            ? ListView.builder(
-                itemCount: snapshot.data.docs.length,
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  DocumentSnapshot ds = snapshot.data.docs[index];
-                  return searchListUserTile(
-                      profileUrl: ds["imgUrl"],
-                      name: ds["name"],
-                      email: ds["email"],
-                      username: ds["username"]);
-                },
-              )
-            : Center(
-                child: CircularProgressIndicator(),
-              );
-      },
-    );
-  }
+        stream: usersStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(
+                child: Text(
+                    "Snapshot Error receiving searched users from chat view"));
+          } else if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.connectionState == ConnectionState.active) {
+            if (snapshot.data.docs.length == 0) {
+              return Center(child: Text("No user found"));
+            }
+            return ListView.builder(
+              itemCount: snapshot.data.docs.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                QueryDocumentSnapshot ds = snapshot.data.docs[index];
+                return searchListUserTile(
+                    profileUrl: ds.data()["imgurl"],
+                    name: ds.data()["name"],
+                    username: ds.data()["username"]);
+              },
+            );
+          } else {
+            return Text("");
+          }
+        });
 
   getChatRooms() async {
     chatRoomsStream = await DatabaseMethods().getChatRooms();
@@ -229,8 +247,8 @@ class _ChatRoomListTileState extends State<ChatRoomListTile> {
     QuerySnapshot querySnapshot = await DatabaseMethods().getUserInfo(username);
     print(
         "something bla bla ${querySnapshot.docs[0].id} ${querySnapshot.docs[0]["name"]}  ${querySnapshot.docs[0]["imgUrl"]}");
-    name = "${querySnapshot.docs[0]["name"]}";
-    profilePicUrl = "${querySnapshot.docs[0]["imgUrl"]}";
+    name = "${querySnapshot.docs[0].data()["name"]}";
+    profilePicUrl = "${querySnapshot.docs[0].data()["imgUrl"]}";
     setState(() {});
   }
 
