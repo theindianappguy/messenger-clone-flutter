@@ -1,6 +1,14 @@
 # messenger_clone
 
-A new Flutter project.
+Messenger clone made with Flutter
+
+### Created & Maintained By
+
+[Sanskar Tiwari](https://github.com/theindianappguy) ([@indianappguy](https://twitter.com/indianappguy)) ([YouTube](https://www.youtube.com/c/SanskarTiwari))
+
+> If you found this project helpful or you learned something from the source code and want to thank me,
+> consider checking out what i am building at [MagicSlides.app](https://www.magicslides.app), [MagicForm.app](https://www.magicform.app) & [SheetAI.app](https://www.sheetai.app)
+
 
 ## Getting Started
 
